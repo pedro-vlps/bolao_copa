@@ -1,0 +1,5 @@
+node_modules
+dist
+data/bolao.sqlite
+data/bolao.sqlite-shm
+data/bolao.sqlite-wal

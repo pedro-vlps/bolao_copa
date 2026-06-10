@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bolao da Copa</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Bolao da Copa 2026</p>
+          <h1>Crie seu grupo, dispare os palpites e acompanhe a corrida pelo topo.</h1>
+          <p class="hero-text">
+            Um front para organizar o bolao com grupos de amigos, ranking em tempo real,
+            palpites de fase de grupos e mata-mata com penaltis.
+          </p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#user-panel">Comecar agora</a>
+            <a class="button button-secondary" href="#matches-panel">Ver jogos</a>
+          </div>
+        </div>
+
+        <aside class="hero-panel" id="summary-panel">
+          <p class="panel-label">Resumo do torneio</p>
+          <div class="summary-grid" id="summary-grid"></div>
+        </aside>
+      </header>
+
+      <section class="app-header-grid">
+        <article class="card" id="user-panel">
+          <div class="card-head">
+            <div>
+              <p class="eyebrow">Passo 1</p>
+              <h2>Seu perfil</h2>
+            </div>
+            <span class="pill" id="user-status">Nao conectado</span>
+          </div>
+
+          <div id="auth-panel">
+            <form class="stack-sm" id="user-form">
+              <label>
+                <span>Nome</span>
+                <input name="name" placeholder="Pedro" required />
+              </label>
+              <label>
+                <span>E-mail</span>
+                <input name="email" placeholder="voce@email.com" type="email" />
+              </label>
+              <button class="button button-primary" type="submit">Salvar perfil</button>
+            </form>
+
+            <div class="identity-card is-hidden" id="user-profile-card">
+              <p class="identity-name" id="user-profile-name"></p>
+              <p class="identity-meta" id="user-profile-email"></p>
+              <button class="button button-secondary" id="logout-button" type="button">
+                Deslogar
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="card-head">
+            <div>
+              <p class="eyebrow">Passo 2</p>
+              <h2>Grupo de amigos</h2>
+            </div>
+          </div>
+
+          <form class="stack-sm" id="create-group-form">
+            <label>
+              <span>Nome do grupo</span>
+              <input name="name" placeholder="Resenha da Firma" required />
+            </label>
+            <button class="button button-primary" type="submit">Criar grupo</button>
+          </form>
+
+          <form class="stack-sm join-form" id="join-group-form">
+            <label>
+              <span>Entrar por convite</span>
+              <input name="inviteCode" placeholder="ABC12345" required />
+            </label>
+            <button class="button button-secondary" type="submit">Entrar no grupo</button>
+          </form>
+
+          <div class="active-group" id="active-group"></div>
+        </article>
+
+        <article class="card app-header-leaderboard">
+          <div class="card-head">
+            <div>
+              <p class="eyebrow">Ranking</p>
+              <h2>Classificacao do grupo</h2>
+            </div>
+          </div>
+          <div class="leaderboard" id="leaderboard-panel">
+            <p class="empty-state">Crie ou entre em um grupo para ver o ranking.</p>
+          </div>
+        </article>
+      </section>
+
+      <main class="layout">
+        <section class="stack stack-main">
+          <article class="card" id="groups-panel">
+            <div class="card-head">
+              <div>
+                <p class="eyebrow">Palpite de grupos</p>
+                <h2>Quem passa em cada grupo</h2>
+              </div>
+              <span class="pill pill-outline">Top 2 + melhores terceiros no torneio</span>
+            </div>
+            <div class="group-grid" id="group-predictions"></div>
+          </article>
+
+          <article class="card" id="matches-panel">
+            <div class="card-head">
+              <div>
+                <p class="eyebrow">Palpites por jogo</p>
+                <h2>Fase de grupos e mata-mata</h2>
+              </div>
+            </div>
+
+            <div class="toolbar">
+              <div class="stage-filters" id="stage-filters"></div>
+              <div class="stage-filters round-filters" id="round-filters"></div>
+              <p class="toolbar-note">
+                O backend bloqueia alteracoes assim que a partida comeca.
+              </p>
+            </div>
+
+            <div class="matches-list" id="matches-list"></div>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <div class="toast-region" id="toast-region"></div>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>
