@@ -336,6 +336,10 @@ select:focus {
   text-transform: uppercase;
 }
 
+.group-exit-button {
+  margin-top: 14px;
+}
+
 .leaderboard {
   display: grid;
   gap: 10px;

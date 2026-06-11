@@ -99,6 +99,7 @@ function bindEvents() {
   elements.logoutButton.addEventListener("click", onLogout);
   elements.createGroupForm.addEventListener("submit", onCreateGroupSubmit);
   elements.joinGroupForm.addEventListener("submit", onJoinGroupSubmit);
+  elements.activeGroup.addEventListener("click", onActiveGroupClick);
   elements.stageFilters.addEventListener("click", onStageFilterClick);
   elements.roundFilters.addEventListener("click", onRoundFilterClick);
   elements.matchesList.addEventListener("submit", onMatchPredictionSubmit);
@@ -213,6 +214,41 @@ async function onJoinGroupSubmit(event) {
     event.currentTarget.reset();
   } catch (error) {
     notify(error.message || "Nao foi possivel entrar no grupo.", true);
+  }
+}
+
+async function onActiveGroupClick(event) {
+  const button = event.target.closest("#leave-group-button");
+  if (!button) {
+    return;
+  }
+
+  if (!state.currentUser?.id || !state.activeGroup?.id) {
+    notify("Nenhum grupo ativo para sair.", true);
+    return;
+  }
+
+  try {
+    const result = await fetchJson(`/pool-groups/${state.activeGroup.id}/leave`, {
+      method: "POST",
+      body: JSON.stringify({
+        userId: state.currentUser.id
+      })
+    });
+
+    state.activeGroup = null;
+    clearStorage(STORAGE_KEYS.activeGroup);
+    renderIdentity();
+    renderLeaderboard(null);
+
+    if (result.groupDeleted) {
+      notify("Voce saiu e o grupo foi encerrado porque nao havia outros participantes.");
+      return;
+    }
+
+    notify("Voce saiu do grupo com sucesso.");
+  } catch (error) {
+    notify(error.message || "Nao foi possivel sair do grupo.", true);
   }
 }
 
@@ -459,6 +495,9 @@ function renderIdentity() {
         <p class="group-name">${escapeHtml(state.activeGroup.name || "Grupo conectado")}</p>
         <p class="group-meta">Convite atual</p>
         <div class="invite-chip">${escapeHtml(state.activeGroup.inviteCode || "sem codigo")}</div>
+        <button class="button button-secondary group-exit-button" id="leave-group-button" type="button">
+          Sair do grupo
+        </button>
       </div>
     `;
   } else {

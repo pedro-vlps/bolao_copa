@@ -582,6 +582,111 @@ app.post("/pool-groups/join", (request, response, next) => {
   }
 });
 
+app.post("/pool-groups/:id/leave", (request, response, next) => {
+  try {
+    const schema = z.object({
+      userId: z.string().min(1)
+    });
+
+    const body = schema.parse(request.body);
+    const poolGroup = get<any>("SELECT * FROM pool_groups WHERE id = :id", {
+      id: request.params.id
+    });
+    const membership = get<any>(
+      `
+        SELECT *
+        FROM group_members
+        WHERE pool_group_id = :poolGroupId AND user_id = :userId
+      `,
+      {
+        poolGroupId: request.params.id,
+        userId: body.userId
+      }
+    );
+
+    if (!poolGroup) {
+      response.status(404).json({ message: "Grupo nao encontrado." });
+      return;
+    }
+
+    if (!membership) {
+      response.status(404).json({ message: "Participacao no grupo nao encontrada." });
+      return;
+    }
+
+    const remainingMembers = all<any>(
+      `
+        SELECT *
+        FROM group_members
+        WHERE pool_group_id = :poolGroupId AND user_id <> :userId
+        ORDER BY datetime(joined_at) ASC
+      `,
+      {
+        poolGroupId: poolGroup.id,
+        userId: body.userId
+      }
+    );
+
+    const nextOwner = membership.role === GroupMemberRole.OWNER ? remainingMembers[0] : null;
+    const shouldDeleteGroup =
+      membership.role === GroupMemberRole.OWNER && remainingMembers.length === 0;
+
+    transaction(() => {
+      run(
+        `
+          DELETE FROM group_members
+          WHERE pool_group_id = :poolGroupId AND user_id = :userId
+        `,
+        {
+          poolGroupId: poolGroup.id,
+          userId: body.userId
+        }
+      );
+
+      if (shouldDeleteGroup) {
+        run("DELETE FROM pool_groups WHERE id = :id", { id: poolGroup.id });
+        return;
+      }
+
+      if (nextOwner) {
+        run(
+          `
+            UPDATE pool_groups
+            SET owner_id = :ownerId, updated_at = :updatedAt
+            WHERE id = :groupId
+          `,
+          {
+            ownerId: nextOwner.user_id,
+            updatedAt: now(),
+            groupId: poolGroup.id
+          }
+        );
+
+        run(
+          `
+            UPDATE group_members
+            SET role = :role
+            WHERE pool_group_id = :poolGroupId AND user_id = :userId
+          `,
+          {
+            role: GroupMemberRole.OWNER,
+            poolGroupId: poolGroup.id,
+            userId: nextOwner.user_id
+          }
+        );
+      }
+    });
+
+    response.json({
+      left: true,
+      groupDeleted: shouldDeleteGroup,
+      transferredOwnershipToUserId: nextOwner?.user_id ?? null
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.get("/pool-groups/:id/leaderboard", (request, response, next) => {
   try {
     const poolGroup = get<any>(
