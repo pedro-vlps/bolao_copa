@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { fileURLToPath } from "node:url";
 import path from "node:path";
 
 import cors from "cors";
@@ -181,7 +182,9 @@ const updateResultSchema = z.object({
 });
 
 export const app = express();
-const publicDirectory = path.join(process.cwd(), "public");
+const currentFilePath = fileURLToPath(import.meta.url);
+const currentDirectory = path.dirname(currentFilePath);
+const publicDirectory = path.resolve(currentDirectory, "..", "..", "public");
 
 app.use(cors());
 app.use(express.json());
