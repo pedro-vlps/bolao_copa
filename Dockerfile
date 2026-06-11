@@ -14,7 +14,7 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
-ENV PORT=3000
+ENV PORT=8080
 ENV DATA_DIR=/app/data
 
 COPY package*.json ./
@@ -25,6 +25,6 @@ COPY --from=builder /app/public ./public
 
 RUN mkdir -p /app/data
 
-EXPOSE 3000
+EXPOSE 8080
 
 CMD ["sh", "-c", "node dist/src/scripts/bootstrap.js && node dist/src/server.js"]
